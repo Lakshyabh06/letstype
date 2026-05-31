@@ -4,36 +4,27 @@ function TypingStats({
   timeLeft,
 }) {
   return (
-    <div className="flex justify-center gap-28 text-center mb-20">
-      <div>
-        <p className="text-muted text-base mb-2">
-          WPM
-        </p>
-
-        <h2 className="text-6xl font-bold text-accent">
+    <div className="mb-7 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-muted">
+      <p>
+        <span className="font-semibold text-primary">
           {wpm}
-        </h2>
-      </div>
+        </span>{" "}
+        wpm
+      </p>
 
-      <div>
-        <p className="text-muted text-base mb-2">
-          Accuracy
-        </p>
-
-        <h2 className="text-6xl font-bold text-accent">
+      <p>
+        <span className="font-semibold text-primary">
           {accuracy}%
-        </h2>
-      </div>
+        </span>{" "}
+        accuracy
+      </p>
 
-      <div>
-        <p className="text-muted text-base mb-2">
-          Time
-        </p>
-
-        <h2 className="text-6xl font-bold text-accent">
+      <p>
+        <span className="font-semibold text-primary">
           {timeLeft}s
-        </h2>
-      </div>
+        </span>{" "}
+        remaining
+      </p>
     </div>
   )
 }

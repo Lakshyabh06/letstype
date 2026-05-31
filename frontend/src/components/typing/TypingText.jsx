@@ -1,6 +1,6 @@
 function TypingText({ text, typedText, currentIndex }) {
   return (
-    <div className="bg-surface min-h-[220px] p-14 rounded-[32px] text-5xl leading-loose tracking-wide border border-white/5 shadow-2xl">
+    <div className="min-h-[220px] rounded-[28px] border border-white/10 bg-surface/80 p-7 text-3xl leading-relaxed shadow-[0_24px_90px_rgba(0,0,0,0.28)] backdrop-blur sm:p-10 sm:text-4xl sm:leading-loose">
       {text.split("").map((char, index) => {
         let textColor = "text-muted"
 

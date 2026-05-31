@@ -1,5 +1,7 @@
+import SettingsPanel from "../components/settings/SettingsPanel"
+
 function Profile() {
-  return <div>Profile Page</div>
+  return <SettingsPanel />
 }
 
 export default Profile

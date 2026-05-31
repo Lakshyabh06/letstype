@@ -7,6 +7,7 @@ import typingWords from "../../data/typingWords"
 
 import useTyping from "../../hooks/useTyping"
 import useTimer from "../../hooks/useTimer"
+import useSoundEngine from "../../hooks/useSoundEngine"
 
 import {
   calculateAccuracy,
@@ -15,6 +16,7 @@ import {
 
 function TypingTest() {
   const text = typingWords[0]
+  const { play } = useSoundEngine()
 
   const {
     typedText,
@@ -53,9 +55,23 @@ function TypingTest() {
     resetTimer()
   }
 
+  function handleTypingWithSound(nextValue) {
+    if (nextValue.length > typedText.length) {
+      const addedCharacters = nextValue.slice(typedText.length)
+
+      addedCharacters.split("").forEach((character, offset) => {
+        const expectedCharacter = text[typedText.length + offset]
+
+        play(character === expectedCharacter ? "correct" : "wrong")
+      })
+    }
+
+    handleTyping(nextValue)
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-[82vh]">
-      <div className="w-full max-w-5xl">
+    <div className="flex flex-col items-center justify-center">
+      <div className="w-full max-w-4xl">
         {!sessionEnded ? (
           <>
             <TypingStats
@@ -72,7 +88,7 @@ function TypingTest() {
 
             <TypingInput
               typedText={typedText}
-              handleTyping={handleTyping}
+              handleTyping={handleTypingWithSound}
               disabled={sessionEnded}
             />
           </>

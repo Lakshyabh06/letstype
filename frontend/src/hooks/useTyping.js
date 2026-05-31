@@ -16,9 +16,24 @@ function useTyping(initialText) {
       setIsTyping(true)
     }
 
-    if (value.length <= initialText.length) {
-      setTypedText(value)
+    if (value.length <= typedText.length) {
+      return
     }
+
+    const addedCharacters = value.slice(typedText.length)
+    let acceptedText = typedText
+
+    for (const character of addedCharacters) {
+      if (acceptedText.length >= initialText.length) {
+        break
+      }
+
+      if (character === initialText[acceptedText.length]) {
+        acceptedText += character
+      }
+    }
+
+    setTypedText(acceptedText)
   }
 
   function resetTyping() {
