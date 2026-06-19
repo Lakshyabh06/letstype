@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @default(uuid()) @db.Uuid
+  name           String          @db.VarChar(120)
+  email          String          @unique @db.VarChar(255)
+  passwordHash   String?         @db.VarChar(255)
+  provider       String          @default("local") @db.VarChar(40)
+  providerId     String?         @unique @db.VarChar(255)
+  settings       UserSettings?
+  progress       Progress[]
+  typingSessions TypingSession[]
+  achievements   Achievement[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([createdAt])
+  @@index([provider])
+  @@map("users")
+}
+
+model UserSettings {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @unique @db.Uuid
+  soundProfile String   @default("standard") @db.VarChar(80)
+  volume       Int      @default(80)
+  theme        String   @default("system") @db.VarChar(80)
+  preferences  Json     @default("{}")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("user_settings")
+}
+
+model Progress {
+  id                   String   @id @default(uuid()) @db.Uuid
+  userId               String   @db.Uuid
+  lessonKey            String   @db.VarChar(120)
+  masteryScore         Decimal  @default(0) @db.Decimal(5, 2)
+  completionPercentage Decimal  @default(0) @db.Decimal(5, 2)
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@unique([userId, lessonKey])
+  @@index([userId])
+  @@index([lessonKey])
+  @@map("progress")
+}
+
+model TypingSession {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  wpm       Decimal  @db.Decimal(6, 2)
+  accuracy  Decimal  @db.Decimal(5, 2)
+  errors    Int      @default(0)
+  duration  Int
+  mode      String   @default("practice") @db.VarChar(80)
+  timestamp DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, timestamp])
+  @@index([timestamp])
+  @@map("typing_sessions")
+}
+
+model Achievement {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @db.Uuid
+  achievementKey String   @db.VarChar(120)
+  title          String   @db.VarChar(160)
+  description    String   @db.Text
+  earnedAt       DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, achievementKey])
+  @@index([achievementKey])
+  @@index([earnedAt])
+  @@map("achievements")
+}

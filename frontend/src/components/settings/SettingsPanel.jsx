@@ -1,3 +1,4 @@
+import AccountSettings from "./AccountSettings"
 import AudioSettings from "./AudioSettings"
 import MotionSettings from "./MotionSettings"
 import WorkspaceSettings from "./WorkspaceSettings"
@@ -24,6 +25,7 @@ function SettingsPanel() {
           </header>
 
           <div className="mt-5 space-y-4">
+            <AccountSettings />
             <AudioSettings />
             <MotionSettings />
             <WorkspaceSettings />

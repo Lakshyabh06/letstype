@@ -139,6 +139,32 @@ const focusWords = [
   "clarity",
   "typing",
   "guided",
+  "observe",
+  "forward",
+  "compose",
+  "balance",
+  "anchor",
+  "repeat",
+  "gentle",
+  "motion",
+  "stable",
+  "intent",
+  "careful",
+  "patient",
+  "flow",
+  "measure",
+  "listen",
+  "prepare",
+  "train",
+  "refine",
+  "growth",
+  "skill",
+  "finish",
+  "simple",
+  "direct",
+  "smooth",
+  "learn",
+  "improve",
 ]
 
 const accuracyWords = [
@@ -154,6 +180,30 @@ const accuracyWords = [
   "return",
   "detail",
   "smooth",
+  "target",
+  "correct",
+  "notice",
+  "repair",
+  "align",
+  "patient",
+  "measure",
+  "reduce",
+  "missed",
+  "finger",
+  "position",
+  "repeat",
+  "check",
+  "stable",
+  "clean",
+  "even",
+  "control",
+  "quiet",
+  "track",
+  "review",
+  "shape",
+  "score",
+  "steady",
+  "sample",
 ]
 
 const beginnerWords = [
@@ -178,6 +228,24 @@ const quoteLines = [
   "the best systems make the next good action easy",
   "calm hands learn the path before they chase the pace",
   "progress is easier to keep when feedback is specific",
+  "a clear target turns effort into useful information",
+  "practice feels lighter when the next step is obvious",
+  "smooth rhythm grows from patient corrections",
+  "good feedback keeps attention close to the work",
+  "speed arrives when accuracy stops feeling fragile",
+  "short focused sessions build trust in the hands",
+  "the quietest improvement is often the most durable",
+  "every clean repetition makes the next one easier",
+  "confidence grows when mistakes become visible",
+  "use the first pass to learn and the second to refine",
+  "steady pace beats rushed effort over a long session",
+  "the keyboard feels smaller when movement is relaxed",
+  "review the pattern then return to the line",
+  "clarity keeps practice from turning into guessing",
+  "the best run leaves you ready for one more",
+  "each correction is a signal not a setback",
+  "train the difficult key before it trains you",
+  "small wins become durable when they are repeated",
 ]
 
 const letterDrills = [
@@ -189,6 +257,18 @@ const letterDrills = [
   "clean form",
   "shift keys",
   "Aa Bb Cc Dd",
+  "asdf fdsa jkl ljk",
+  "qaz wsx edc rfvt",
+  "ujm ik ol p",
+  "fr de sw aq",
+  "ju ki lo p",
+  "aa ss dd ff jj kk ll",
+  "left hand right hand",
+  "home reach home reach",
+  "sad lad fall ask",
+  "seal desk safe lead",
+  "quiet quick equal",
+  "right light tight",
 ]
 
 const numberDrills = [
@@ -198,6 +278,16 @@ const numberDrills = [
   "24680 13579",
   "90817 26354",
   "31415 92653",
+  "11223 34455",
+  "66778 89900",
+  "2026 1492 7531",
+  "8080 4040 9090",
+  "135 246 579 680",
+  "7001 8204 9365",
+  "12 34 56 78 90",
+  "9012 3456 7890",
+  "500 250 125 062",
+  "1984 2001 2048",
 ]
 
 const symbolDrills = [
@@ -207,6 +297,16 @@ const symbolDrills = [
   "< > | \\",
   "[] {} () <>",
   "$25.00 @ 10%",
+  "name@example.com",
+  "value === true;",
+  "path/to/file",
+  "left -> right",
+  "score += 1;",
+  "(alpha) [beta] {gamma}",
+  "price: $48.50",
+  "ratio = 3:2",
+  "save_as_final.txt",
+  "ready? yes!",
 ]
 
 const mixedCharacterDrills = [
@@ -216,6 +316,16 @@ const mixedCharacterDrills = [
   "m8*N v6&B",
   "Z1x! C2v@ B3n#",
   "Type4Fun!",
+  "PlanA-27 ready?",
+  "Focus_90 @ home",
+  "Key#42 = steady",
+  "R5t! L8m? Q2",
+  "alpha-7 beta_9",
+  "Run(30) then review",
+  "Save_v2 before 5pm",
+  "A1 s2 D3 f4 J5",
+  "mix: 18% clean",
+  "ID-7420 ok!",
 ]
 
 const alphanumericDrills = [
@@ -225,6 +335,16 @@ const alphanumericDrills = [
   "alpha7 beta9 gamma3",
   "K8M1 P4R6 T2Y5",
   "ID2048 PIN7391",
+  "route66 cabin12 signal5",
+  "A1B2 C3D4 E5F6",
+  "task24 batch18 build07",
+  "Q7W8 E9R1 T2Y3",
+  "level3 stage5 round8",
+  "zone12 grid45 path89",
+  "M4N7 B2V9 C6X1",
+  "alpha2026 beta140 gamma73",
+  "room101 floor8 desk42",
+  "key19 key27 key38",
 ]
 
 const programmingLines = [
@@ -234,6 +354,18 @@ const programmingLines = [
   "if (isCorrect) { score += 1; }",
   "const keys = [\"a\", \"s\", \"d\", \"f\"];",
   "for (let index = 0; index < total; index += 1) {}",
+  "const active = items.filter(Boolean);",
+  "return input.trim().toLowerCase();",
+  "if (!user) { return null; }",
+  "items.map((item) => item.id);",
+  "const score = Math.max(0, value);",
+  "while (queue.length > 0) {}",
+  "export function resetSession() {}",
+  "const next = current + step;",
+  "try { await saveDraft(); } catch (error) {}",
+  "button.addEventListener(\"click\", start);",
+  "const total = values.reduce((sum, item) => sum + item, 0);",
+  "return `${firstName}.${lastName}`;",
 ]
 
 const emailLines = [
@@ -243,27 +375,76 @@ const emailLines = [
   "first.last+practice@mail.co",
   "billing_2026@service.net",
   "learn.typing@letstype.app",
+  "practice.team@example.org",
+  "first.last@workplace.dev",
+  "typing-coach@learning.io",
+  "review+daily@inbox.com",
+  "hello.world@domain.co",
+  "team_42@product.app",
+  "support+trial@service.io",
+  "name.surname@company.net",
+  "student2026@school.edu",
+  "updates@letstype.app",
 ]
 
-function repeatToLength(items, targetCount, seed = 0) {
-  const output = []
+function seededRandom(seed = 0) {
+  let value = Math.imul(seed ^ 0x9e3779b9, 0x85ebca6b)
 
-  for (let index = 0; output.length < targetCount; index += 1) {
-    output.push(items[(index + seed) % items.length])
+  return () => {
+    value += 0x6d2b79f5
+    let next = Math.imul(value ^ (value >>> 15), value | 1)
+
+    next ^= next + Math.imul(next ^ (next >>> 7), next | 61)
+
+    return ((next ^ (next >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+function shuffleWithSeed(items, seed = 0) {
+  const output = [...items]
+  const random = seededRandom(seed)
+
+  for (let index = output.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1))
+    const current = output[index]
+
+    output[index] = output[swapIndex]
+    output[swapIndex] = current
   }
 
   return output
 }
 
+function repeatToLength(items, targetCount, seed = 0) {
+  const output = []
+  let round = 0
+
+  while (output.length < targetCount) {
+    output.push(...shuffleWithSeed(items, seed + round * 131))
+    round += 1
+  }
+
+  return output.slice(0, targetCount)
+}
+
 function repeatLinesToText(lines, targetWordCount, seed = 0) {
   const output = []
   let wordCount = 0
+  let round = 0
 
-  for (let index = 0; wordCount < targetWordCount; index += 1) {
-    const line = lines[(index + seed) % lines.length]
+  while (wordCount < targetWordCount) {
+    const lineSet = shuffleWithSeed(lines, seed + round * 193)
 
-    output.push(line)
-    wordCount += line.split(/\s+/).filter(Boolean).length
+    for (const line of lineSet) {
+      if (wordCount >= targetWordCount) {
+        break
+      }
+
+      output.push(line)
+      wordCount += line.split(/\s+/).filter(Boolean).length
+    }
+
+    round += 1
   }
 
   return output.join(" ")

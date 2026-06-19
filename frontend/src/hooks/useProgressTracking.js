@@ -3,6 +3,10 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { evaluateAchievementUnlocks } from "../utils/achievementEngine"
 import { calculateXPReward } from "../utils/xpCalculator"
 import { createEmptyGamificationProgress } from "./useGamification"
+import { getProgress, updateLessonProgress } from "../api/progressService"
+import { createSession } from "../api/sessionService"
+import { syncOrQueue } from "../api/syncQueue"
+import useAuth from "./useAuth"
 import {
   updateLessonStreak,
   updatePracticeStreak,
@@ -397,6 +401,7 @@ function updateAdaptiveProgress(currentAdaptive = {}, lesson, sessionRecord, res
 }
 
 function useProgressTracking(modules) {
+  const auth = useAuth()
   const baseLessons = useMemo(
     () => modules.flatMap((module) => module.lessons),
     [modules]
@@ -404,11 +409,57 @@ function useProgressTracking(modules) {
   const [progress, setProgress] = useState(() =>
     normalizeProgress(readProgressSnapshot(null), baseLessons)
   )
+  const [syncState, setSyncState] = useState({
+    error: null,
+    status: "idle",
+  })
 
   useEffect(() => {
     writeProgressSnapshot(progress)
     writeStorage(legacyCompletedLessonsKey, progress.completedLessonIds)
   }, [progress])
+
+  useEffect(() => {
+    if (!auth.isAuthenticated) {
+      return
+    }
+
+    let isCurrent = true
+
+    getProgress()
+      .then((backendProgress) => {
+        if (!isCurrent) {
+          return
+        }
+
+        setProgress((currentProgress) =>
+          normalizeProgress(
+            {
+              ...currentProgress,
+              completedLessonIds: Array.from(
+                new Set([
+                  ...(currentProgress.completedLessonIds || []),
+                  ...(backendProgress.completedLessons || []),
+                ])
+              ),
+            },
+            baseLessons
+          )
+        )
+        setSyncState({ error: null, status: "synced" })
+      })
+      .catch((error) => {
+        if (!isCurrent) {
+          return
+        }
+
+        setSyncState({ error: error.message, status: "error" })
+      })
+
+    return () => {
+      isCurrent = false
+    }
+  }, [auth.isAuthenticated, baseLessons])
 
   const trackedModules = useMemo(
     () => applyProgressionStatus(modules, progress.completedLessonIds),
@@ -434,6 +485,39 @@ function useProgressTracking(modules) {
             0
           ) / progress.accuracyHistory.length
         )
+
+  const syncLessonCompletion = useCallback(
+    (lesson, sessionRecord) => {
+      if (!auth.isAuthenticated) {
+        return
+      }
+
+      const progressPayload = {
+        completion: 100,
+        lessonId: lesson.id,
+        masteryScore: Math.round(sessionRecord.accuracy ?? 100),
+      }
+      const sessionPayload = {
+        ...sessionRecord,
+        elapsedSeconds: sessionRecord.seconds,
+        modeLabel: sessionRecord.lessonTitle || lesson.title,
+      }
+
+      setSyncState({ error: null, status: "saving" })
+
+      Promise.all([
+        syncOrQueue("progress", progressPayload, () =>
+          updateLessonProgress(progressPayload)
+        ),
+        syncOrQueue("session", sessionPayload, () => createSession(sessionPayload)),
+      ])
+        .then(() => setSyncState({ error: null, status: "synced" }))
+        .catch((error) =>
+          setSyncState({ error: error.message, status: "error" })
+        )
+    },
+    [auth.isAuthenticated]
+  )
 
   const recordLessonCompletion = useCallback((lesson, result = {}) => {
     const sessionRecord = buildSessionRecord(lesson, result)
@@ -490,8 +574,10 @@ function useProgressTracking(modules) {
       }
     })
 
+    syncLessonCompletion(lesson, sessionRecord)
+
     return completionSummary || { sessionRecord }
-  }, [])
+  }, [syncLessonCompletion])
 
   return {
     averageAccuracy,
@@ -504,6 +590,7 @@ function useProgressTracking(modules) {
     progress,
     progressPercent,
     recordLessonCompletion,
+    syncState,
   }
 }
 

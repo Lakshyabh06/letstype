@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from "react"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 
 import AudioSettings from "./components/audio/AudioSettings"
+import BackendSync from "./components/system/BackendSync"
 import ErrorBoundary from "./components/system/ErrorBoundary"
 import LoadingState from "./components/system/LoadingState"
 import PerformanceOverlay from "./components/system/PerformanceOverlay"
@@ -24,6 +25,7 @@ function App() {
   return (
     <BrowserRouter>
       <AudioSettings />
+      <BackendSync />
       <ErrorBoundary>
         <Routes>
           <Route path="/" element={<MainLayout />}>

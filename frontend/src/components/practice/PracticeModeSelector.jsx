@@ -13,7 +13,7 @@ function PracticeModeSelector({
   const activeModeIsTimed = isTimedPracticeMode(activeModeId)
 
   return (
-    <section className="rounded-[24px] border border-white/10 bg-background/35 p-4">
+    <section className="mt-4">
       <div className="mb-4">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-secondary">
           Practice modes
@@ -50,8 +50,11 @@ function PracticeModeSelector({
       </div>
 
       {categories.length > 0 && (
-        <div className="mt-6 border-t border-white/10 pt-5">
-          <div className="mb-4">
+        <details className="mt-5 rounded-2xl border border-white/10 bg-white/[0.018] p-4">
+          <summary className="cursor-pointer text-sm font-semibold text-primary">
+            Content categories
+          </summary>
+          <div className="mb-4 mt-4">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-secondary">
               Practice categories
             </p>
@@ -85,7 +88,7 @@ function PracticeModeSelector({
               )
             })}
           </div>
-        </div>
+        </details>
       )}
 
       {activeModeIsTimed && (

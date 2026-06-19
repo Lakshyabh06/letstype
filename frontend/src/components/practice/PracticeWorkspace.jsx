@@ -30,7 +30,7 @@ import {
 
 function MetricPill({ label, value }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 transition duration-200 hover:-translate-y-0.5 hover:border-accent/25 hover:bg-white/[0.045]">
+    <div className="rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3">
       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
         {label}
       </p>
@@ -99,14 +99,26 @@ function CoachingPanel({ analytics, practicePlan }) {
 
 function getCharacterClass({ expected, typed }) {
   if (typed === undefined) {
-    return "text-muted"
+    return expected === " " ? "text-transparent" : "text-muted"
   }
 
   if (typed === expected) {
-    return "text-primary"
+    return expected === " " ? "text-transparent" : "text-primary"
   }
 
-  return "rounded bg-error/15 text-error"
+  return "rounded bg-error/18 px-0.5 text-error"
+}
+
+function getDisplayCharacter(expected, typed) {
+  if (typed === undefined || typed === expected) {
+    return expected === " " ? "\u00a0" : expected
+  }
+
+  if (typed === " ") {
+    return "\u00b7"
+  }
+
+  return typed
 }
 
 const practiceScrollAnchor = {
@@ -172,41 +184,60 @@ const PracticeText = memo(function PracticeText({
   }, [activeWordIndex])
 
   return (
-    <div className="text-[1.65rem] leading-[2.45rem] text-muted sm:text-4xl sm:leading-[3.3rem]">
+    <div className="text-[1.72rem] leading-[2.6rem] text-muted sm:text-4xl sm:leading-[3.35rem]">
       {wordRanges.map((range) => {
         const isActive = range.index === activeWordIndex
         const isComplete = currentIndex >= range.end
+        const nextRange = wordRanges[range.index + 1]
+        const trailingText = text.slice(range.end, nextRange?.start ?? text.length)
 
         return (
-          <span
-            key={`${range.value}-${range.start}`}
-            ref={isActive ? activeWordRef : null}
-            className={`mr-3 inline-block rounded-xl px-1.5 transition duration-200 ${
-              isActive
-                ? "bg-white/[0.055] text-primary"
-                : isComplete
-                  ? "text-primary/75"
-                  : "text-muted"
-            }`}
-          >
-            {range.value.split("").map((character, offset) => {
-              const index = range.start + offset
+          <span key={`${range.value}-${range.start}`}>
+            <span
+              ref={isActive ? activeWordRef : null}
+              className={`inline-block rounded-lg px-1 transition duration-200 ${
+                isActive
+                  ? "bg-white/[0.065] text-primary"
+                  : isComplete
+                    ? "text-primary/78"
+                    : "text-muted"
+              }`}
+            >
+              {range.value.split("").map((character, offset) => {
+                const index = range.start + offset
+                const typed = typedText[index]
+
+                return (
+                  <span
+                    key={`${range.start}-${offset}`}
+                    className={getCharacterClass({
+                      expected: character,
+                      typed,
+                    })}
+                  >
+                    {index === currentIndex && <TypingCaret />}
+                    {getDisplayCharacter(character, typed)}
+                  </span>
+                )
+              })}
+            </span>
+            {trailingText.split("").map((character, offset) => {
+              const index = range.end + offset
               const typed = typedText[index]
 
               return (
                 <span
-                  key={`${range.start}-${offset}`}
+                  key={`${range.end}-${offset}`}
                   className={getCharacterClass({
                     expected: character,
                     typed,
                   })}
                 >
                   {index === currentIndex && <TypingCaret />}
-                  {character}
+                  {getDisplayCharacter(character, typed)}
                 </span>
               )
             })}
-            {currentIndex === range.end && <TypingCaret />}
           </span>
         )
       })}
@@ -386,29 +417,21 @@ function PracticeWorkspace({
   }
 
   function handlePracticeChange(event) {
-    const nextText = event.target.value
-
-    if (nextText.length <= engine.typedText.length) {
-      return
-    }
+    const nextText = event.target.value.slice(0, engine.prompt.text.length)
 
     if (nextText.length > engine.typedText.length) {
       const addedCharacters = nextText.slice(engine.typedText.length)
-      let acceptedIndex = engine.typedText.length
 
-      addedCharacters.split("").forEach((character) => {
-        const expectedCharacter = engine.prompt.text[acceptedIndex]
+      addedCharacters.split("").forEach((character, offset) => {
+        const index = engine.typedText.length + offset
+        const expectedCharacter = engine.prompt.text[index]
         const isCorrect = character === expectedCharacter
 
         play(isCorrect ? "correct" : "wrong")
-
-        if (isCorrect) {
-          acceptedIndex += 1
-        }
       })
 
-      if (acceptedIndex > 0 && acceptedIndex % 24 === 0) {
-        play("combo", { throttleMs: 400 })
+      if (nextText.length > 0 && nextText.length % 28 === 0) {
+        play("combo", { throttleMs: 500, gain: 0.62 })
       }
     }
 
@@ -420,49 +443,40 @@ function PracticeWorkspace({
   const activeModeIsTimed = isTimedPracticeMode(modeId)
   const heading = engine.prompt.title
   const subtitle =
-    "A focused typing workspace connected to your lessons, analytics, recommendations, XP, and daily consistency."
+    "Learn -> Practice -> Improve -> Review results"
 
   return (
     <div className={`min-w-0 px-3 pb-8 sm:px-5 lg:px-6 ${isFocusMode ? "focus-mode-active" : ""}`}>
-      <div className="mx-auto grid min-w-0 max-w-[var(--workspace-max,1800px)] gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(330px,360px)] 2xl:grid-cols-[minmax(0,1fr)_minmax(360px,390px)]">
+      <div className="mx-auto grid min-w-0 max-w-[var(--workspace-max,1800px)] gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(300px,340px)]">
         <main className="min-w-0 space-y-4">
-          <AnimatedPanel className="focus-mode-primary min-w-0 rounded-[28px] border border-white/10 bg-surface/72 shadow-[0_24px_80px_rgba(0,0,0,0.22)] backdrop-blur">
-            <header className="border-b border-white/10 px-5 py-5 sm:px-6">
-              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <AnimatedPanel className="focus-mode-primary min-w-0 rounded-[28px] border border-accent/18 bg-surface/78 shadow-[0_30px_110px_rgba(0,0,0,0.32)] backdrop-blur">
+            <header className="border-b border-white/10 px-5 py-4 sm:px-6">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div className="min-w-0">
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-secondary">
-                    Premium practice workspace
+                    Practice
                   </p>
                   <h1 className="mt-2 text-3xl font-semibold leading-tight text-primary sm:text-4xl">
                     {heading}
                   </h1>
-                  <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
+                  <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-muted">
                     {subtitle}
                   </p>
-                  <div className="mt-4">
-                    <FocusModeOverlay
-                      isFocusMode={isFocusMode}
-                      onToggle={toggleFocusMode}
-                      size="compact"
-                    />
-                  </div>
                 </div>
 
-                <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-4 lg:min-w-[520px]">
-                  <MetricPill label="WPM" value={engine.metrics.wpm} />
-                  <MetricPill
-                    label="Accuracy"
-                    value={`${engine.metrics.accuracy}%`}
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={handleRestart}
+                    className="h-10 rounded-full border border-accent/35 bg-accent/10 px-4 text-sm font-semibold text-primary transition duration-200 hover:bg-accent/18"
+                  >
+                    Restart
+                  </button>
+                  <FocusModeOverlay
+                    isFocusMode={isFocusMode}
+                    onToggle={toggleFocusMode}
+                    size="compact"
                   />
-                  <MetricPill
-                    label={activeModeIsTimed ? "Time" : "Progress"}
-                    value={
-                      activeModeIsTimed
-                        ? `${engine.timeLeft}s`
-                        : `${engine.metrics.progress}%`
-                    }
-                  />
-                  <MetricPill label="XP" value={combinedXP} />
                 </div>
               </div>
             </header>
@@ -474,7 +488,7 @@ function PracticeWorkspace({
                 data-practice-text-panel
                 onClick={() => inputRef.current?.focus({ preventScroll: true })}
                 onKeyDown={() => inputRef.current?.focus({ preventScroll: true })}
-                className="max-h-[min(54vh,540px)] min-h-[340px] scroll-py-24 overflow-y-auto rounded-[24px] border border-white/10 bg-background/45 p-5 outline-none transition duration-200 focus-within:border-accent/35 focus-within:shadow-[0_0_0_1px_rgba(216,199,163,0.08),0_20px_80px_rgba(0,0,0,0.22)] sm:p-8"
+                className="max-h-[min(50vh,560px)] min-h-[330px] scroll-py-24 overflow-y-auto rounded-[24px] border border-accent/20 bg-background/58 p-5 outline-none transition duration-200 focus-within:border-accent/45 focus-within:shadow-[0_0_0_1px_rgba(216,199,163,0.12),0_24px_90px_rgba(0,0,0,0.28)] sm:min-h-[360px] sm:p-8"
               >
                 <PracticeText
                   activeWordIndex={engine.activeWordIndex}
@@ -492,10 +506,21 @@ function PracticeWorkspace({
                 />
               </div>
 
-              <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.025] p-3">
-                <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted">
-                  <span>Session progress</span>
-                  <span className="text-accent">{engine.metrics.progress}%</span>
+              <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+                      Typing feedback
+                    </p>
+                    <p className="mt-1 text-sm text-primary">
+                      {engine.metrics.mistakes > 0
+                        ? `${engine.metrics.mistakes} historical mistake${engine.metrics.mistakes === 1 ? "" : "s"} recorded. Backspace can fix the line, not erase the attempt.`
+                        : "Clean so far. Keep the rhythm relaxed."}
+                    </p>
+                  </div>
+                  <span className="rounded-full border border-white/10 bg-background/45 px-3 py-1.5 text-sm font-semibold text-accent">
+                    {engine.metrics.progress}%
+                  </span>
                 </div>
                 <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/[0.055]">
                   <div
@@ -510,59 +535,36 @@ function PracticeWorkspace({
                 </div>
               </div>
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
-                    Raw speed
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-primary">
-                    {engine.metrics.rawWpm} WPM
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
-                    Mistakes
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-primary">
-                    {engine.metrics.mistakes}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
-                    Elapsed
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-primary">
-                    {engine.elapsedSeconds}s
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
-                    Consistency
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-primary">
-                    {engine.metrics.typingConsistency.label}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
-                    Streak
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-primary">
-                    {practiceStreak} days
-                  </p>
-                </div>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                <MetricPill label="WPM" value={engine.metrics.wpm} />
+                <MetricPill
+                  label="Accuracy"
+                  value={`${engine.metrics.accuracy}%`}
+                />
+                <MetricPill
+                  label={activeModeIsTimed ? "Time" : "Progress"}
+                  value={
+                    activeModeIsTimed
+                      ? `${engine.timeLeft}s`
+                      : `${engine.metrics.progress}%`
+                  }
+                />
+                <MetricPill label="Raw speed" value={`${engine.metrics.rawWpm} WPM`} />
+                <MetricPill label="Mistakes" value={engine.metrics.mistakes} />
+                <MetricPill label="Elapsed" value={`${engine.elapsedSeconds}s`} />
+                <MetricPill
+                  label="Consistency"
+                  value={engine.metrics.typingConsistency.label}
+                />
+                <MetricPill label="XP" value={combinedXP} />
               </div>
             </div>
           </AnimatedPanel>
 
-          <div className="focus-mode-dim">
-            <QuickPracticeCard
-              onAction={handleShortcut}
-              practicePlan={activePracticePlan || practicePlan}
-            />
-          </div>
-
-          <div className="focus-mode-dim">
+          <details className="focus-mode-dim rounded-[24px] border border-white/10 bg-background/28 p-4">
+            <summary className="cursor-pointer text-sm font-semibold text-primary">
+              Session options
+            </summary>
             <PracticeModeSelector
               activeModeId={modeId}
               categories={categoryOptions}
@@ -573,28 +575,68 @@ function PracticeWorkspace({
               onDurationChange={handleDurationChange}
               onModeChange={handleModeChange}
             />
-          </div>
+          </details>
 
-          <div className="focus-mode-dim">
+          <details className="focus-mode-dim rounded-[24px] border border-white/10 bg-background/28 p-4">
+            <summary className="cursor-pointer text-sm font-semibold text-primary">
+              Training shortcuts
+            </summary>
+            <div className="mt-4">
+              <QuickPracticeCard
+                compact
+                onAction={handleShortcut}
+                practicePlan={activePracticePlan || practicePlan}
+              />
+            </div>
+          </details>
+
+          <details className="focus-mode-dim rounded-[24px] border border-white/10 bg-background/28 p-4">
+            <summary className="cursor-pointer text-sm font-semibold text-primary">
+              Analytics and recommendations
+            </summary>
+            <div className="mt-4">
             <AnalyticsDashboard
               analytics={enhancedAnalytics}
               practicePlan={activePracticePlan || practicePlan}
             />
-          </div>
+            </div>
+          </details>
         </main>
 
         <div className="focus-mode-dim min-w-0 space-y-4">
-          <CoachingPanel
-            analytics={enhancedAnalytics}
-            practicePlan={activePracticePlan || practicePlan}
-          />
-          <PracticeHistoryPanel
-            bestScores={bestScores}
-            improvementPattern={improvementPattern}
-            recentSessions={recentSessions}
-            streak={streak}
-            totalXP={totalXP}
-          />
+          <details className="rounded-[24px] border border-white/10 bg-background/28 p-4" open>
+            <summary className="cursor-pointer text-sm font-semibold text-primary">
+              Improve
+            </summary>
+            <div className="mt-4">
+              <CoachingPanel
+                analytics={enhancedAnalytics}
+                practicePlan={activePracticePlan || practicePlan}
+              />
+            </div>
+          </details>
+          <details className="rounded-[24px] border border-white/10 bg-background/28 p-4">
+            <summary className="cursor-pointer text-sm font-semibold text-primary">
+              Review results
+            </summary>
+            <div className="mt-4">
+              <PracticeHistoryPanel
+                bestScores={bestScores}
+                improvementPattern={improvementPattern}
+                recentSessions={recentSessions}
+                streak={streak}
+                totalXP={totalXP}
+              />
+              <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.025] p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+                  Streak
+                </p>
+                <p className="mt-2 text-lg font-semibold text-primary">
+                  {practiceStreak} days
+                </p>
+              </div>
+            </div>
+          </details>
         </div>
       </div>
 

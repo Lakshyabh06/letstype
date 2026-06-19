@@ -1,10 +1,16 @@
 import settingsStore from "../store/settingsStore"
+import { getAuthToken } from "../api/apiClient"
+import {
+  buildBackendSettingsPatch,
+  updateSettings,
+} from "../api/settingsService"
+import { syncOrQueue } from "../api/syncQueue"
 import audioMixer from "./audioMixer"
 
 const defaultCategoryVolumes = {
-  feedback: 1,
-  rewards: 0.86,
-  typing: 1,
+  feedback: 0.34,
+  rewards: 0.42,
+  typing: 0.38,
   ui: 0,
 }
 
@@ -245,75 +251,75 @@ export const soundThemes = {
     id: "mechanical",
     label: "Mechanical",
     sounds: createProfile({
-      combo: createKeySound({ body: 0.24, click: 0.3, gain: 0.66, low: 135 }),
-      complete: createRewardSound([0, 0.09], 0.48),
+      combo: createKeySound({ body: 0.16, click: 0.22, gain: 0.44, low: 135 }),
+      complete: createRewardSound([0, 0.09], 0.32),
       correct: createKeySound({
-        body: 0.34,
-        click: 0.48,
-        gain: 0.86,
+        body: 0.2,
+        click: 0.3,
+        gain: 0.48,
         low: 128,
-        lowGain: 0.11,
+        lowGain: 0.075,
         resonance: 360,
-        resonanceGain: 0.12,
+        resonanceGain: 0.07,
       }),
-      wrong: createErrorSound({ body: 0.22, click: 0.3, gain: 0.78, low: 118 }),
+      wrong: createErrorSound({ body: 0.12, click: 0.18, gain: 0.36, low: 118 }),
     }),
   },
   precision: {
     id: "precision",
     label: "Precision",
     sounds: createProfile({
-      combo: createKeySound({ body: 0.16, click: 0.24, gain: 0.6, low: 205 }),
-      complete: createRewardSound([0, 0.075], 0.44),
+      combo: createKeySound({ body: 0.1, click: 0.16, gain: 0.36, low: 205 }),
+      complete: createRewardSound([0, 0.075], 0.28),
       correct: createKeySound({
-        body: 0.2,
-        click: 0.34,
-        gain: 0.78,
+        body: 0.12,
+        click: 0.2,
+        gain: 0.42,
         low: 190,
-        lowGain: 0.045,
+        lowGain: 0.035,
         resonance: 540,
-        resonanceGain: 0.055,
+        resonanceGain: 0.04,
       }),
-      wrong: createErrorSound({ body: 0.16, click: 0.28, gain: 0.72, low: 145 }),
+      wrong: createErrorSound({ body: 0.09, click: 0.16, gain: 0.34, low: 145 }),
     }),
   },
   minimal: {
     id: "minimal",
     label: "Minimal",
     sounds: createProfile({
-      combo: createKeySound({ body: 0.1, click: 0.18, gain: 0.48, lowGain: 0.025 }),
-      complete: createRewardSound([0, 0.065], 0.36),
+      combo: createKeySound({ body: 0.045, click: 0.08, gain: 0.22, lowGain: 0.012 }),
+      complete: createRewardSound([0, 0.065], 0.2),
       correct: createKeySound({
-        body: 0.13,
-        click: 0.26,
-        gain: 0.66,
+        body: 0.06,
+        click: 0.11,
+        gain: 0.24,
         low: 245,
-        lowGain: 0.026,
+        lowGain: 0.012,
         resonance: 680,
-        resonanceGain: 0.035,
+        resonanceGain: 0.018,
       }),
-      wrong: createErrorSound({ body: 0.12, click: 0.24, gain: 0.66, low: 165 }),
+      wrong: createErrorSound({ body: 0.05, click: 0.11, gain: 0.24, low: 165 }),
     }),
   },
   touch: {
     id: "touch",
     label: "Touch",
     sounds: createProfile({
-      combo: createKeySound({ body: 0.075, click: 0.22, gain: 0.48, lowGain: 0.018 }),
-      complete: createRewardSound([0, 0.065], 0.34),
+      combo: createKeySound({ body: 0.04, click: 0.1, gain: 0.24, lowGain: 0.012 }),
+      complete: createRewardSound([0, 0.065], 0.2),
       correct: createKeySound({
-        body: 0.08,
-        click: 0.3,
-        gain: 0.68,
+        body: 0.045,
+        click: 0.13,
+        gain: 0.28,
         low: 340,
-        lowGain: 0.018,
+        lowGain: 0.01,
         resonance: 820,
-        resonanceGain: 0.026,
+        resonanceGain: 0.014,
       }),
       wrong: createErrorSound({
-        body: 0.09,
-        click: 0.26,
-        gain: 0.66,
+        body: 0.045,
+        click: 0.11,
+        gain: 0.24,
         low: 190,
         resonance: 280,
       }),
@@ -332,6 +338,22 @@ function clamp(value, min = 0, max = 1) {
 
 function getMasterVolume(settings) {
   return clamp(settings.masterVolume ?? settings.volume ?? 1)
+}
+
+function syncBackendAudioSettings(audioSettings) {
+  if (!getAuthToken()) {
+    return
+  }
+
+  const patch = buildBackendSettingsPatch("audio", audioSettings)
+
+  if (Object.keys(patch).length === 0) {
+    return
+  }
+
+  syncOrQueue("settings", patch, () => updateSettings(patch)).catch(() => {
+    // Audio preferences remain cached locally; retryable failures are queued.
+  })
 }
 
 class SoundManager {
@@ -365,6 +387,7 @@ class SoundManager {
     }
 
     settingsStore.updateSection("audio", { themeId })
+    syncBackendAudioSettings({ themeId })
     this.preload(true)
   }
 
@@ -376,6 +399,10 @@ class SoundManager {
     const nextVolume = clamp(masterVolume)
 
     settingsStore.updateSection("audio", {
+      masterVolume: nextVolume,
+      volume: nextVolume,
+    })
+    syncBackendAudioSettings({
       masterVolume: nextVolume,
       volume: nextVolume,
     })
@@ -516,7 +543,7 @@ class SoundManager {
 
       audioMixer.playBuffer(this.getBuffer(soundName), {
         category: sound.category,
-        gain: clamp((options.gain ?? sound.gain ?? 0.8) * gainJitter),
+        gain: clamp((options.gain ?? sound.gain ?? 0.8) * gainJitter * 0.62),
         rate: playbackRate,
       })
     })

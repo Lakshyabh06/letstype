@@ -26,7 +26,9 @@ function usePracticeEngine({
     initialSession?.duration === duration &&
     initialSession?.typedText
   const [promptSeed, setPromptSeed] = useState(() =>
-    canRestore ? initialSession.promptSeed || 0 : 0
+    canRestore
+      ? initialSession.promptSeed || 0
+      : Math.floor(Date.now() + Math.random() * 100000)
   )
   const [typedText, setTypedText] = useState(() =>
     canRestore ? initialSession.typedText || "" : ""
@@ -172,11 +174,18 @@ function usePracticeEngine({
       return
     }
 
-    if (nextValue.length <= typedText.length) {
+    const cappedValue = nextValue.slice(0, prompt.text.length)
+
+    if (cappedValue.length < typedText.length) {
+      setTypedText(cappedValue)
       return
     }
 
-    const attemptedCharacters = nextValue
+    if (cappedValue.length === typedText.length) {
+      return
+    }
+
+    const attemptedCharacters = cappedValue
       .slice(typedText.length)
       .slice(0, prompt.text.length - typedText.length)
     const now = Date.now()
@@ -212,9 +221,7 @@ function usePracticeEngine({
           timestamp: now,
         })
 
-        if (isCorrect) {
-          nextText += actualKey
-        }
+        nextText += actualKey
       }
 
       nextAttemptHistory = [...attemptHistory, ...newAttempts]

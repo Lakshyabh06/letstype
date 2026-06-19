@@ -178,40 +178,24 @@ Analytics in LetsType are designed to answer the most useful learning question: 
 
 ## 🏗️ Architecture
 
-LetsType is organized as a modern React frontend with clear separation between pages, layouts, components, data, hooks, stores, and utilities.
+LetsType is organized as a React frontend, Node.js backend, and centralized infrastructure folder for deployment assets.
 
 ```txt
 TypeLearner/
 +-- README.md
 +-- frontend/
-    +-- public/
-    |   +-- letstype-logo.png
-    |   +-- favicon.svg
-    |   +-- icons.svg
-    +-- src/
-    |   +-- components/
-    |   |   +-- adaptive/
-    |   |   +-- analytics/
-    |   |   +-- audio/
-    |   |   +-- brand/
-    |   |   +-- course/
-    |   |   +-- finger-guide/
-    |   |   +-- keyboard/
-    |   |   +-- layout/
-    |   |   +-- practice/
-    |   |   +-- settings/
-    |   +-- data/
-    |   +-- hooks/
-    |   +-- layouts/
-    |   +-- pages/
-    |   +-- store/
-    |   +-- utils/
-    |   +-- App.jsx
-    |   +-- index.css
-    |   +-- main.jsx
-    +-- index.html
-    +-- package.json
-    +-- vite.config.js
++-- backend/
++-- infra/
+    +-- frontend/
+    |   +-- Dockerfile
+    |   +-- nginx.conf
+    |   +-- .dockerignore
+    +-- backend/
+    |   +-- Dockerfile
+    |   +-- .dockerignore
+    +-- terraform/
+    +-- k8s/
+    +-- argocd/
 ```
 
 ### Frontend Flow
@@ -282,6 +266,18 @@ Run linting:
 npm run lint
 ```
 
+Build the frontend image from the repository root:
+
+```bash
+docker build -f infra/frontend/Dockerfile -t typelearner-frontend .
+```
+
+Build the backend image from the repository root:
+
+```bash
+docker build -f infra/backend/Dockerfile -t typelearner-backend .
+```
+
 ---
 
 ## 🗺️ Roadmap
@@ -318,70 +314,21 @@ LetsType is positioned to evolve from a polished frontend learning experience in
 ## 📁 Repository Structure
 
 ```txt
-frontend/
-+-- public/
-|   +-- favicon.svg
-|   +-- icons.svg
-|   +-- letstype-logo.png
-+-- src/
-|   +-- components/
-|   |   +-- adaptive/
-|   |   +-- analytics/
-|   |   +-- audio/
-|   |   +-- brand/
-|   |   +-- course/
-|   |   +-- finger-guide/
-|   |   +-- keyboard/
-|   |   +-- layout/
-|   |   +-- practice/
-|   |   +-- settings/
-|   +-- data/
-|   |   +-- course.js
-|   |   +-- fingerMap.js
-|   |   +-- keyboardLayout.js
-|   |   +-- lessonIntroSlides.js
-|   |   +-- lessons.js
-|   |   +-- typingWords.js
-|   +-- hooks/
-|   |   +-- useAdaptiveLearning.js
-|   |   +-- useAnalyticsEngine.js
-|   |   +-- useGamification.js
-|   |   +-- usePracticeEngine.js
-|   |   +-- useTyping.js
-|   |   +-- useTypingSession.js
-|   +-- layouts/
-|   |   +-- AppShell.jsx
-|   |   +-- LearningWorkspace.jsx
-|   |   +-- MainLayout.jsx
-|   |   +-- SidebarNavigation.jsx
-|   |   +-- WorkspacePanel.jsx
-|   +-- pages/
-|   |   +-- Home.jsx
-|   |   +-- Lessons.jsx
-|   |   +-- NotFound.jsx
-|   |   +-- Practice.jsx
-|   |   +-- Profile.jsx
-|   +-- store/
-|   |   +-- appStore.js
-|   |   +-- progressStore.js
-|   |   +-- settingsStore.js
-|   +-- utils/
-|   |   +-- adaptivePracticeGenerator.js
-|   |   +-- analyticsCalculator.js
-|   |   +-- audioMixer.js
-|   |   +-- practiceAnalytics.js
-|   |   +-- recommendationEngine.js
-|   |   +-- sessionAnalyzer.js
-|   |   +-- typingMetrics.js
-|   |   +-- xpCalculator.js
-|   +-- App.jsx
-|   +-- index.css
-|   +-- main.jsx
-+-- eslint.config.js
-+-- index.html
-+-- package-lock.json
-+-- package.json
-+-- vite.config.js
+TypeLearner/
++-- README.md
++-- frontend/
++-- backend/
++-- infra/
+    +-- frontend/
+    |   +-- Dockerfile
+    |   +-- nginx.conf
+    |   +-- .dockerignore
+    +-- backend/
+    |   +-- Dockerfile
+    |   +-- .dockerignore
+    +-- terraform/
+    +-- k8s/
+    +-- argocd/
 ```
 
 ---
@@ -409,6 +356,7 @@ Suggested contribution areas:
 | **Platform** | Backend, persistence, deployment, CI/CD |
 
 ---
+
 
 <div align="center">
   <strong>LetsType</strong>

@@ -4,6 +4,9 @@ import {
   readPracticeSnapshot,
   writePracticeSnapshot,
 } from "../store/progressStore"
+import { createSession } from "../api/sessionService"
+import { syncOrQueue } from "../api/syncQueue"
+import useAuth from "./useAuth"
 
 function toDateKey(value = new Date()) {
   const date = new Date(value)
@@ -115,6 +118,7 @@ function getImprovementPattern(sessions = []) {
 }
 
 function useTypingSession() {
+  const auth = useAuth()
   const [practiceProgress, setPracticeProgress] = useState(readPracticeProgress)
 
   useEffect(() => {
@@ -141,8 +145,14 @@ function useTypingSession() {
       }
     })
 
+    if (auth.isAuthenticated) {
+      syncOrQueue("session", session, () => createSession(session)).catch(() => {
+        // Practice history is already cached locally; retryable failures are queued.
+      })
+    }
+
     return recordedSession
-  }, [])
+  }, [auth.isAuthenticated])
 
   return useMemo(
     () => ({
