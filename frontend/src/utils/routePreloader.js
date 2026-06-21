@@ -1,4 +1,5 @@
 export const routePreloaders = {
+  auth: () => import("../pages/Auth"),
   home: () => import("../pages/Home"),
   lessons: () => import("../pages/Lessons"),
   practice: () => import("../pages/Practice"),

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from "react"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 
+import { ProtectedRoute, PublicOnlyRoute } from "./components/auth/AuthGuards"
 import AudioSettings from "./components/audio/AudioSettings"
 import BackendSync from "./components/system/BackendSync"
 import ErrorBoundary from "./components/system/ErrorBoundary"
@@ -10,6 +11,7 @@ import MainLayout from "./layouts/MainLayout"
 import { preloadPrimaryRoutes, routePreloaders } from "./utils/routePreloader"
 
 const Home = lazy(routePreloaders.home)
+const Auth = lazy(routePreloaders.auth)
 const Lessons = lazy(routePreloaders.lessons)
 const Practice = lazy(routePreloaders.practice)
 const Profile = lazy(routePreloaders.profile)
@@ -28,7 +30,25 @@ function App() {
       <BackendSync />
       <ErrorBoundary>
         <Routes>
-          <Route path="/" element={<MainLayout />}>
+          <Route
+            path="/auth"
+            element={
+              <PublicOnlyRoute>
+                <PageSuspense>
+                  <Auth />
+                </PageSuspense>
+              </PublicOnlyRoute>
+            }
+          />
+
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <MainLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route
               index
               element={
