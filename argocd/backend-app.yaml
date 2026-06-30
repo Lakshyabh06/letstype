@@ -9,7 +9,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/
+    repoURL: https://github.com/yuktasingh16/terraform_infra
     targetRevision: main
     path: infra/k8s/backend
 

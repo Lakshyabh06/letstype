@@ -1,9 +1,12 @@
 replicaCount: 2
 
 image:
-  repository: 123456789012.dkr.ecr.ap-south-1.amazonaws.com/letstype-backend
-  tag: latest
+  repository: REPLACE_WITH_ECR_REPOSITORY
+  tag: REPLACE_WITH_IMAGE_TAG
   pullPolicy: Always
+
+# Use a digestable CI tag like `${{ github.sha }}` or a build number.
+# Avoid `latest` when the ECR repo is immutable.
 
 service:
   type: ClusterIP
@@ -34,6 +37,3 @@ env:
   DB_PORT: "5432"
   DB_NAME: "letstype"
   DB_USER: "postgres"
-  DB_PASSWORD: "LetsType@123"
-
-  JWT_SECRET: "lets-type-secret"

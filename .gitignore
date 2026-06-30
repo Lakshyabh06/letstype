@@ -1,12 +1,24 @@
+# Terraform
 .terraform/
 *.tfstate
 *.tfstate.*
-.terraform.lock.hcl
+*.tfplan
+tfplan
 
+# Lock file (KEEP if working in team)
+# .terraform.lock.hcl
+
+# Variables
+*.tfvars
+
+# Keys
 *.pem
 *.key
 
+# IDE
 .vscode/
+.idea/
 
+# OS Files
 Thumbs.db
 .DS_Store
