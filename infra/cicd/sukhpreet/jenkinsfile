@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+    environment {
+        DOCKER_IMAGE = "sukhpreetkaur95/letstype"
+        DOCKER_TAG = "latest"
+    }
+    stages {
+        stage('Clone Code') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/sukhpreetkaur-dev/letstype-k8s.git'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+            }
+        }
+        stage('Trivy Scan') {
+            steps {
+                sh 'trivy image --exit-code 0 --severity HIGH,CRITICAL --no-progress sukhpreetkaur95/letstype:latest'
+            }
+        }
+        stage('Push to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'USERNAME',
+                    passwordVariable: 'PASSWORD'
+                )]) {
+                    sh "docker login -u ${USERNAME} -p ${PASSWORD}"
+                    sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                }
+            }
+        }
+    }
+}

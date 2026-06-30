@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: letstype-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: letstype
+  template:
+    metadata:
+      labels:
+        app: letstype
+    spec:
+      containers:
+      - name: letstype
+        image: lakshya0612/letstype:latest
+        ports:
+        - containerPort: 80
